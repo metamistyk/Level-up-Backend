@@ -34,7 +34,7 @@ public class CartServiceImpl implements CartService {
 
         dto.setCartId(cart.getId());
 
-        var items = cart.getCartItems().stream().map(item -> {
+        var items = cart.getItems().stream().map(item -> {
 
             CartItemResponseDTO i = new CartItemResponseDTO();
 
@@ -72,7 +72,7 @@ public class CartServiceImpl implements CartService {
     }
 
     private CartItem getExistingCartItem(Cart cart, Long productId) {
-        return cart.getCartItems().stream()
+        return cart.getItems().stream()
             .filter(ci -> ci.getProduct().getId().equals(productId))
             .findFirst()
             .orElse(null);
@@ -158,8 +158,8 @@ public class CartServiceImpl implements CartService {
 
         Cart cart = getOrCreateCart(user);
 
-        cartItemRepository.deleteAll(cart.getCartItems());
-        cart.getCartItems().clear();
+        cartItemRepository.deleteAll(cart.getItems());
+        cart.getItems().clear();
         cartRepository.save(cart);
 
         return toDTO(cart);

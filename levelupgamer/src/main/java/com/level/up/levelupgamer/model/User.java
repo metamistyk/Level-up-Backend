@@ -1,5 +1,6 @@
 package com.level.up.levelupgamer.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,7 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users")  // mejor plural
+@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,7 +33,8 @@ public class User {
     @Column(nullable = false, length = 40)
     private String password;
 
-    // Lado inverso de la relación
+    // Para evitar recursión infinita en JSON
+    @JsonIgnore
     @OneToOne(mappedBy = "user")
     private Cart cart;
 }
