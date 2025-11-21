@@ -1,5 +1,7 @@
 package com.level.up.levelupgamer.service.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.level.up.levelupgamer.dto.LoginRequestDTO;
@@ -17,18 +19,34 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public User findById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
+    @Override
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    @Override
+    public void delete(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    // =========================================
+    //               LOGIN
+    // =========================================
+    @Override
     public UserResponseDTO login(LoginRequestDTO dto) {
 
-        User user = userRepository.findByEmail(dto.getEmail());
-
-        if (user == null) {
-            throw new RuntimeException("Usuario no encontrado");
-        }
-
-        // Contraseña en texto plano (modo simple)
-        if (!user.getPassword().equals(dto.getPassword())) {
-            throw new RuntimeException("Credenciales inválidas");
-        }
+        User user = userRepository.findByEmailAndPassword(dto.getEmail(), dto.getPassword())
+                .orElseThrow(() -> new RuntimeException("Credenciales inválidas"));
 
         UserResponseDTO response = new UserResponseDTO();
         response.setId(user.getId());

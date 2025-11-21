@@ -1,6 +1,8 @@
 package com.level.up.levelupgamer.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -40,5 +42,5 @@ public class Cart {
         orphanRemoval = true,
         fetch = FetchType.LAZY
     )
-    private List<CartItem> items;
+    private List<CartItem> items = new ArrayList<>();
 }

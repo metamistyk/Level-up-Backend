@@ -19,71 +19,66 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
 
-    private ProductResponseDTO toDTO(Product product) {
+    private ProductResponseDTO toDTO(Product p) {
         ProductResponseDTO dto = new ProductResponseDTO();
-        dto.setId(product.getId());
-        dto.setName(product.getName());
-        dto.setDescription(product.getDescription());
-        dto.setPrice(product.getPrice());
-        dto.setStock(product.getStock());
-        dto.setImageUrl(product.getImageUrl());
-        dto.setDestacado(product.getDestacado());
+        dto.setId(p.getId());
+        dto.setName(p.getName());
+        dto.setDescription(p.getDescription());
+        dto.setPrice(p.getPrice());
+        dto.setImageUrl(p.getImageUrl());
+        dto.setDestacado(p.getDestacado());
         return dto;
     }
 
-    private Product toEntity(ProductRequestDTO dto) {
-        Product product = new Product();
-        product.setName(dto.getName());
-        product.setDescription(dto.getDescription());
-        product.setPrice(dto.getPrice());
-        product.setStock(dto.getStock());
-        product.setImageUrl(dto.getImageUrl());
-        product.setDestacado(dto.getDestacado());
-        return product;
+    private Product fromDTO(ProductRequestDTO dto) {
+        Product p = new Product();
+        p.setName(dto.getName());
+        p.setDescription(dto.getDescription());
+        p.setPrice(dto.getPrice());
+        p.setImageUrl(dto.getImageUrl());
+        p.setDestacado(dto.getDestacado());
+        return p;
     }
 
     @Override
     public List<ProductResponseDTO> getAll() {
         return productRepository.findAll()
-            .stream()
-            .map(this::toDTO)
-            .collect(Collectors.toList());
+                .stream().map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<ProductResponseDTO> getDestacados() {
         return productRepository.findByDestacadoTrue()
-            .stream()
-            .map(this::toDTO)
-            .collect(Collectors.toList());
+                .stream().map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public ProductResponseDTO getById(Long id) {
-        Product product = productRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-        return toDTO(product);
+        Product p = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        return toDTO(p);
     }
 
     @Override
     public ProductResponseDTO create(ProductRequestDTO dto) {
-        Product product = toEntity(dto);
-        return toDTO(productRepository.save(product));
+        Product p = fromDTO(dto);
+        return toDTO(productRepository.save(p));
     }
 
     @Override
     public ProductResponseDTO update(Long id, ProductRequestDTO dto) {
-        Product existing = productRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        Product p = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        existing.setName(dto.getName());
-        existing.setDescription(dto.getDescription());
-        existing.setPrice(dto.getPrice());
-        existing.setStock(dto.getStock());
-        existing.setImageUrl(dto.getImageUrl());
-        existing.setDestacado(dto.getDestacado());
+        p.setName(dto.getName());
+        p.setDescription(dto.getDescription());
+        p.setPrice(dto.getPrice());
+        p.setImageUrl(dto.getImageUrl());
+        p.setDestacado(dto.getDestacado());
 
-        return toDTO(productRepository.save(existing));
+        return toDTO(productRepository.save(p));
     }
 
     @Override
@@ -93,10 +88,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductResponseDTO> search(String name) {
-        return productRepository.findAll()
-            .stream()
-            .filter(p -> p.getName().toLowerCase().contains(name.toLowerCase()))
-            .map(this::toDTO)
-            .collect(Collectors.toList());
+        return productRepository.findByNameContainingIgnoreCase(name)
+                .stream().map(this::toDTO)
+                .collect(Collectors.toList());
     }
 }

@@ -1,5 +1,6 @@
 package com.level.up.levelupgamer.service.impl;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -28,10 +29,12 @@ public class CartServiceImpl implements CartService {
     private final ProductRepository productRepository;
     private final CartItemRepository cartItemRepository;
 
+    // ===========================================
+    // CONVERSIÓN A DTO
+    // ===========================================
     private CartResponseDTO toDTO(Cart cart) {
 
         CartResponseDTO dto = new CartResponseDTO();
-
         dto.setCartId(cart.getId());
 
         var items = cart.getItems().stream().map(item -> {
@@ -53,53 +56,66 @@ public class CartServiceImpl implements CartService {
         dto.setItems(items);
 
         double total = items.stream()
-            .mapToDouble(CartItemResponseDTO::getSubtotal)
-            .sum();
+                .mapToDouble(CartItemResponseDTO::getSubtotal)
+                .sum();
 
         dto.setTotal(total);
 
         return dto;
     }
 
+    // ===========================================
+    // OBTENER O CREAR CARRITO
+    // ===========================================
     private Cart getOrCreateCart(User user) {
-        Cart cart = cartRepository.findByUser(user);
-        if (cart == null) {
-            cart = new Cart();
-            cart.setUser(user);
-            cartRepository.save(cart);
-        }
+    Cart cart = cartRepository.findByUser(user);
+    if (cart == null) {
+        cart = new Cart();
+        cart.setUser(user);
+        cart.setItems(new ArrayList<>());   // 👈 IMPORTANTE
+        cart = cartRepository.save(cart);
+    }
         return cart;
     }
 
+    // ===========================================
+    // OBTENER ITEM EXISTENTE
+    // ===========================================
     private CartItem getExistingCartItem(Cart cart, Long productId) {
         return cart.getItems().stream()
-            .filter(ci -> ci.getProduct().getId().equals(productId))
-            .findFirst()
-            .orElse(null);
+                .filter(ci -> ci.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElse(null);
     }
 
+    // ===========================================
+    // GET CART POR USER
+    // ===========================================
     @Override
     public CartResponseDTO getCartByUser(Long userId) {
 
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         Cart cart = getOrCreateCart(user);
 
         return toDTO(cart);
     }
 
+    // ===========================================
+    // ADD ITEM
+    // ===========================================
     @Override
     @Transactional
     public CartResponseDTO addItem(Long userId, Long productId, Integer quantity) {
 
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         Cart cart = getOrCreateCart(user);
 
         Product product = productRepository.findById(productId)
-            .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
         CartItem existing = getExistingCartItem(cart, productId);
 
@@ -111,18 +127,23 @@ public class CartServiceImpl implements CartService {
             newItem.setCart(cart);
             newItem.setProduct(product);
             newItem.setQuantity(quantity);
+            cart.getItems().add(newItem); // 🔥 IMPORTANTE
             cartItemRepository.save(newItem);
         }
 
+        // volver a cargar con items actualizados
         return toDTO(cartRepository.findById(cart.getId()).orElseThrow());
     }
 
+    // ===========================================
+    // UPDATE QUANTITY
+    // ===========================================
     @Override
     @Transactional
     public CartResponseDTO updateQuantity(Long cartItemId, Integer quantity) {
 
         CartItem item = cartItemRepository.findById(cartItemId)
-            .orElseThrow(() -> new RuntimeException("Item no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Item no encontrado"));
 
         if (quantity <= 0) {
             cartItemRepository.delete(item);
@@ -135,12 +156,15 @@ public class CartServiceImpl implements CartService {
         return toDTO(cartRepository.findById(cart.getId()).orElseThrow());
     }
 
+    // ===========================================
+    // REMOVE ITEM
+    // ===========================================
     @Override
     @Transactional
     public CartResponseDTO removeItem(Long cartItemId) {
 
         CartItem item = cartItemRepository.findById(cartItemId)
-            .orElseThrow(() -> new RuntimeException("Item no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Item no encontrado"));
 
         Cart cart = item.getCart();
 
@@ -149,17 +173,21 @@ public class CartServiceImpl implements CartService {
         return toDTO(cartRepository.findById(cart.getId()).orElseThrow());
     }
 
+    // ===========================================
+    // CLEAR CART
+    // ===========================================
     @Override
     @Transactional
     public CartResponseDTO clearCart(Long userId) {
 
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         Cart cart = getOrCreateCart(user);
 
         cartItemRepository.deleteAll(cart.getItems());
         cart.getItems().clear();
+
         cartRepository.save(cart);
 
         return toDTO(cart);
