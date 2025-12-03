@@ -17,7 +17,7 @@ public class OpenApiConfig {
                         .version("1.0")
                         .description("Documentación automática de la API para el sistema Level-Up Gamer")
                         .contact(new Contact()
-                                .name("Leonardo Amundarain")
+                                .name("Braulio Levio, Emilio Abaid")
                                 .email("soporte@levelupgamer.cl")
                         )
                 );

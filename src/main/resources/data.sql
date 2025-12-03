@@ -1,4 +1,4 @@
--- 🔥 SE RESETEA TODO EN ORDEN CORRECTO DE LLAVES FORÁNEAS
+-- SE RESETEA TODO EN ORDEN CORRECTO DE LLAVES FORÁNEAS
 
 -- 1) Borrar items del carrito (dependen de carts y de products)
 DELETE FROM cart_items;
