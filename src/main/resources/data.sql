@@ -51,7 +51,7 @@ VALUES (
     'Control inalámbrico oficial de Xbox con diseño ergonómico y conectividad Bluetooth.',
     97235,
     'control-xbox.png',
-    TRUE
+    FALSE
 );
 
 -- 5. Mouse Gamer Logitech G502 Hero
@@ -161,7 +161,7 @@ VALUES (
     'Parlantes gamer 2.0 con subwoofer, luces LED y controles de bajos/agudos.',
     40990,
     'parlantesGamer.png',
-    TRUE
+    FALSE
 );
 
 -- 16. Teclado Gamer Monster Punisher
@@ -181,5 +181,5 @@ VALUES (
     'Notebook gamer con CPU Intel/AMD, GPU Nvidia y pantalla 15.6" 144Hz.',
     799990,
     'nitro5.png',
-    TRUE
+    FALSE
 );
