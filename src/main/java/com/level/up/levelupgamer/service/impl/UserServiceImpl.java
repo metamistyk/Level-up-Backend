@@ -23,27 +23,23 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
 
-    //   CREA EL ADMIN AUTOMÁTICAMENTE SI NO EXISTE
     @PostConstruct
-    public void createDefaultAdmin() {
-        userRepository.findByEmail("admin@admin.com").ifPresentOrElse(
-            user -> {}, // ya existe
-            () -> {
-                User admin = new User();
-                admin.setUsername("ADMIN");
-                admin.setEmail("admin@admin.com");
-                admin.setPassword("admin123");
-                admin.setRole("ADMIN");  // 👈 importante
+    public void initAdmin() {
+        userRepository.findByEmail("admin@admin.com").orElseGet(() -> {
+            User admin = new User();
+            admin.setUsername("ADMIN");
+            admin.setEmail("admin@admin.com");
+            admin.setPassword("admin123");
+            admin.setRole("ADMIN");
 
-                User saved = userRepository.save(admin);
+            User savedAdmin = userRepository.save(admin);
 
-                Cart cart = new Cart();
-                cart.setUser(saved);
-                cartRepository.save(cart);
+            Cart cart = new Cart();
+            cart.setUser(savedAdmin);
+            cartRepository.save(cart);
 
-                System.out.println(">>> ADMIN CREADO AUTOMÁTICAMENTE <<<");
-            }
-        );
+            return savedAdmin;
+        });
     }
 
     @Override
@@ -59,28 +55,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO register(UserRequestDTO dto) {
-
-        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new RuntimeException("El correo ya está registrado");
-        }
-
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
-        user.setRole("USER"); // 👈 siempre usuario normal
+        user.setRole("USER");
 
-        User newUser = userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         Cart cart = new Cart();
-        cart.setUser(newUser);
+        cart.setUser(savedUser);
         cartRepository.save(cart);
 
         return new UserResponseDTO(
-            newUser.getId(),
-            newUser.getUsername(),
-            newUser.getEmail(),
-            newUser.getRole()
+                savedUser.getId(),
+                savedUser.getUsername(),
+                savedUser.getEmail(),
+                savedUser.getRole()
         );
     }
 
@@ -91,7 +82,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO login(LoginRequestDTO dto) {
-
         User u = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -100,10 +90,10 @@ public class UserServiceImpl implements UserService {
         }
 
         return new UserResponseDTO(
-            u.getId(),
-            u.getUsername(),
-            u.getEmail(),
-            u.getRole()
+                u.getId(),
+                u.getUsername(),
+                u.getEmail(),
+                u.getRole()
         );
     }
 }

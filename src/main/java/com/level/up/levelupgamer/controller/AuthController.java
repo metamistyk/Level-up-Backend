@@ -13,26 +13,18 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
-    /**
-     * Login ORIGINAL que ya usa tu frontend.
-     * Lo dejamos igual para no romper nada.
-     */
     @PostMapping("/login")
     public UserResponseDTO login(@RequestBody LoginRequestDTO dto) {
         return userService.login(dto);
     }
 
-    /**
-     * Nuevo login que incluye token JWT.
-     * El frontend nuevo usará ESTE endpoint: /api/auth/login-jwt
-     */
     @PostMapping("/login-jwt")
     public AuthResponseDTO loginWithJwt(@RequestBody LoginRequestDTO dto) {
         UserResponseDTO user = userService.login(dto);
